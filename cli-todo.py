@@ -1,6 +1,20 @@
-print("\nTO DO LIST\n\nTo add a task, type 'add + task'\nTo delete, type 'delete + task'\nTo show the to do list, type 'show'\nTo exit, type 'exit'")
+import json
+print("\nTO DO LIST\n\nTo add a task, type 'add + task'\nTo delete, type 'delete + task'\n To complete a task, type 'complete + task'\nTo show the to do list, type 'show'\nTo exit, type 'exit'")
 
-todo = []
+def load_tasks():
+    try:
+        with open("tasks.json") as f:
+            tasks = json.load(f)
+            return tasks
+    except FileNotFoundError:
+        return []
+
+def save_tasks(tasks: list):
+    with open("tasks.json", "w") as f:
+        json.dump(tasks, f, indent=1)
+
+tasks = load_tasks()
+
 going = True
 
 while going:
@@ -9,18 +23,35 @@ while going:
     formattedTask = task.strip().lower()
 
     if formattedTask.startswith("add"):
-        todo.append(task[4:])
+        tasks.append({"task": task[4:].strip(), "done": False})
+        save_tasks(tasks)
+    
+    elif formattedTask.startswith("complete"):
+        for item in tasks:
+            if item["task"] == task[9:].strip():
+                item["done"] = True
+        save_tasks(tasks)
+
     elif formattedTask.startswith("delete"):
-        taskToDelete = task[7:]
-        if taskToDelete not in todo:
-            print("Task not found. Please check spelling.")
-        else:
-            todo.remove(taskToDelete)
-    elif "show" in formattedTask:
+        taskToDelete = task[7:].strip()
+        for item in tasks:
+            if item["task"] == taskToDelete:
+                print(f'Task "{item["task"]}" deleted.')
+                tasks.remove(item)
+                break
+        save_tasks(tasks)
+
+
+    elif formattedTask.startswith("show"):
         print("\nTO DO LIST:\n")
-        for item in todo:
-            print(f"{todo.index(item) + 1}. {item}")
-    elif "exit" in formattedTask:
+        for index, item in enumerate(tasks, start=1):
+            if item["done"] == False:
+                print(f'{index}. [ ] {item["task"]}')
+            else:
+                print(f'{index}. [x] {item["task"]}')
+   
+    elif formattedTask.startswith("exit"):
         going = False
+
     else:
-        print("Invalid input. Please add or delete a task or show the to do list.")
+        print('Invalid input. Please add or delete a task or show the to do list.')
