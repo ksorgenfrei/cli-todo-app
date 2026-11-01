@@ -1,5 +1,5 @@
 import json
-print("\nTO DO LIST\n\nTo add a task, type 'add + task'\nTo delete, type 'delete + task'\n To complete a task, type 'complete + task'\nTo show the to do list, type 'show'\nTo exit, type 'exit'")
+print("\nTO DO LIST\n\nTo add a task, type 'add + task'\nTo delete, type 'delete + task'\nTo complete a task, type 'complete + task'\nTo show the to do list, type 'show'\nTo exit, type 'exit'")
 
 def load_tasks():
     try:
@@ -20,29 +20,37 @@ going = True
 while going:
     task = input()
 
-    formattedTask = task.strip().lower()
+    formatted_task = task.strip().lower()
 
-    if formattedTask.startswith("add"):
-        tasks.append({"task": task[4:].strip(), "done": False})
+    if formatted_task.startswith("add"):
+        task = task[4:].strip()
+        if any(item.get("task") == task for item in tasks):
+            print(f'Task "{task}" is already on the to do list.')
+        else:
+            tasks.append({"task": task, "done": False})
+            print(f'Task "{task}" added.')
         save_tasks(tasks)
+
     
-    elif formattedTask.startswith("complete"):
+    elif formatted_task.startswith("complete"):
+        task = task[9:].strip()
         for item in tasks:
-            if item["task"] == task[9:].strip():
+            if item["task"] == task:
+                print(f'Task "{task}" completed.')
                 item["done"] = True
         save_tasks(tasks)
 
-    elif formattedTask.startswith("delete"):
-        taskToDelete = task[7:].strip()
+    elif formatted_task.startswith("delete"):
+        task_to_delete = task[7:].strip()
         for item in tasks:
-            if item["task"] == taskToDelete:
+            if item["task"] == task_to_delete:
                 print(f'Task "{item["task"]}" deleted.')
                 tasks.remove(item)
                 break
         save_tasks(tasks)
 
 
-    elif formattedTask.startswith("show"):
+    elif formatted_task.startswith("show"):
         print("\nTO DO LIST:\n")
         for index, item in enumerate(tasks, start=1):
             if item["done"] == False:
@@ -50,7 +58,7 @@ while going:
             else:
                 print(f'{index}. [x] {item["task"]}')
    
-    elif formattedTask.startswith("exit"):
+    elif formatted_task.startswith("exit"):
         going = False
 
     else:
